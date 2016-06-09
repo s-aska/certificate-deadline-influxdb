@@ -1,0 +1,14 @@
+{
+  "name": "certificate-deadline-influxdb",
+  "description": "Write the Deadline of SSL certificate to InfluxDB",
+  "keywords": [
+      "Certificate",
+      "InfluxDB"
+  ],
+  "website": "https://github.com/s-aska/certificate-deadline-influxdb",
+  "repository": "https://github.com/s-aska/certificate-deadline-influxdb",
+  "env": {
+    "CHECK_HOSTS": "example.com,example.org",
+    "BASIC_AUTH_PASS": "http://localhost:8086/write?db=mydb"
+  }
+}
