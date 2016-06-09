@@ -8,7 +8,7 @@
   "website": "https://github.com/s-aska/certificate-deadline-influxdb",
   "repository": "https://github.com/s-aska/certificate-deadline-influxdb",
   "env": {
-    "CHECK_HOSTS": "example.com,example.org",
+    "DOMAINS": "example.com,example.org",
     "BASIC_AUTH_PASS": "http://localhost:8086/write?db=mydb"
   }
 }
