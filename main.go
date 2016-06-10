@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-var domains = strings.Split(os.Getenv("DOMAINS"), ",")
-var url = os.Getenv("INFLUXDB_WRITE_URL") // http://localhost:8086/write?db=mydb
 
 func main() {
 	port := os.Getenv("PORT")
@@ -20,6 +18,8 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	domains := strings.Split(os.Getenv("DOMAINS"), ",")
+	url := os.Getenv("INFLUXDB_WRITE_URL") // http://localhost:8086/write?db=mydb
 	for _, domain := range domains {
 		t := check(domain)
 		duration := t.Unix() - time.Now().Unix()
