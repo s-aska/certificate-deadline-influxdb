@@ -1,0 +1,5 @@
+{
+	"ImportPath": "github.com/s-aska/certificate-deadline-influxdb",
+	"GoVersion": "go1.6",
+	"Deps": []
+}

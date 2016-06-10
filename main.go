@@ -10,16 +10,22 @@ import (
 	"time"
 )
 
+var domains = strings.Split(os.Getenv("DOMAINS"), ",")
+var url = os.Getenv("INFLUXDB_WRITE_URL") // http://localhost:8086/write?db=mydb
+
 func main() {
+	port := os.Getenv("PORT")
+	http.HandleFunc("/", handler) // ハンドラを登録してウェブページを表示させる
+	http.ListenAndServe(":" + port, nil)
+}
 
-	domains := strings.Split(os.Getenv("DOMAINS"), ",")
-	url := os.Getenv("INFLUXDB_WRITE_URL") // http://localhost:8086/write?db=mydb
-
+func handler(w http.ResponseWriter, r *http.Request) {
 	for _, domain := range domains {
 		t := check(domain)
 		duration := t.Unix() - time.Now().Unix()
 		post(url, domain, fmt.Sprint(duration))
 	}
+	fmt.Fprintf(w, "ok")
 }
 
 func check(domain string) time.Time {
