@@ -9,6 +9,6 @@
   "repository": "https://github.com/s-aska/certificate-deadline-influxdb",
   "env": {
     "DOMAINS": "example.com,example.org",
-    "BASIC_AUTH_PASS": "http://localhost:8086/write?db=mydb"
+    "INFLUXDB_WRITE_URL": "http://localhost:8086/write?db=mydb"
   }
 }
