@@ -45,7 +45,7 @@ func check(domain string) time.Time {
 }
 
 func post(url string, domain string, value string) {
-	fmt.Println("domain:" + domain + " expires:" + value)
+	fmt.Println("domain:" + domain + " expires:" + value + " url:" + url)
 	client := new(http.Client)
 	req, _ := http.NewRequest("POST", url, strings.NewReader("deadline,domain="+domain+" value="+value))
 	res, err := client.Do(req)
