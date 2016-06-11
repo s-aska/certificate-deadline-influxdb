@@ -17,6 +17,7 @@ func main() {
 	domains = strings.Split(os.Getenv("DOMAINS"), ",")
 	url = os.Getenv("INFLUXDB_WRITE_URL") // http://localhost:8086/write?db=mydb
 	fmt.Println("[Startup] domains:"+strings.Join(domains, ",")+" url:"+url)
+	checkAll()
 	cron()
 
 	http.HandleFunc("/", handler) // ハンドラを登録してウェブページを表示させる
@@ -42,11 +43,36 @@ func cron() {
 
 func checkAll() {
 	for _, domain := range domains {
-		check(domain)
+		checkDeadline(domain)
+		checkElapsed(domain)
 	}
 }
 
-func check(domain string) {
+func checkElapsed(domain string) {
+	s := time.Now()
+	res, err := http.Get("https://"+domain)
+	if err != nil {
+		log.Fatal("error:" + err.Error())
+		return
+	}
+	elapsed := time.Since(s)
+	defer res.Body.Close()
+	reportElapsed(domain, fmt.Sprint(elapsed.Nanoseconds()))
+}
+
+func reportElapsed(domain string, value string) {
+	fmt.Println("domain:" + domain + " elapsed:" + value + " url:" + url)
+	client := new(http.Client)
+	req, _ := http.NewRequest("POST", url, strings.NewReader("elapsed,domain="+domain+" value="+value))
+	res, err := client.Do(req)
+	if err != nil {
+		log.Fatal("error:" + err.Error())
+		return
+	}
+	defer res.Body.Close()
+}
+
+func checkDeadline(domain string) {
 	config := tls.Config{}
 
 	conn, err := tls.Dial("tcp", domain+":443", &config)
@@ -61,10 +87,10 @@ func check(domain string) {
 	defer conn.Close()
 
 	duration := certs[0].NotAfter.Unix() - time.Now().Unix()
-	report(domain, fmt.Sprint(duration))
+	reportDeadline(domain, fmt.Sprint(duration))
 }
 
-func report(domain string, value string) {
+func reportDeadline(domain string, value string) {
 	fmt.Println("domain:" + domain + " expires:" + value + " url:" + url)
 	client := new(http.Client)
 	req, _ := http.NewRequest("POST", url, strings.NewReader("deadline,domain="+domain+" value="+value))
