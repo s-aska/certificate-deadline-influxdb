@@ -3,6 +3,29 @@ Certificate deadline influxdb
 
 Write the Deadline of SSL certificate to InfluxDB.
 
-#### Heroku Button
+#### Docker
 
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+```sh
+docker pull aska/certificate-deadline-influxdb
+
+docker run \
+    -e DOMAINS="example.com,example.org" \
+    -e INFLUXDB_WRITE_URL="http://example.com:8086/write?db=mydb" \
+    --publish 8080:8080 \
+    --name test \
+    --rm aska/certificate-deadline-influxdb
+```
+
+#### Arukas
+
+- Image: aska/certificate-deadline-influxdb:latest
+- Port: 8080
+- ENV:
+    - DOMAINS
+    - INFLUXDB_WRITE_URL 
+
+#### Grafana
+
+```sh
+SELECT mean("value") FROM "deadline" WHERE "domain" = 'example.com' AND $timeFilter GROUP BY time($interval) fill(null)
+```
