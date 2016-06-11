@@ -16,26 +16,42 @@ var url string
 func main() {
 	domains = strings.Split(os.Getenv("DOMAINS"), ",")
 	url = os.Getenv("INFLUXDB_WRITE_URL") // http://localhost:8086/write?db=mydb
-	port := os.Getenv("PORT")
+	cron()
+
 	http.HandleFunc("/", handler) // ハンドラを登録してウェブページを表示させる
-	http.ListenAndServe(":" + port, nil)
+	http.ListenAndServe(":8080", nil)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	for _, domain := range domains {
-		t := check(domain)
-		duration := t.Unix() - time.Now().Unix()
-		post(url, domain, fmt.Sprint(duration))
-	}
-	fmt.Fprintf(w, "ok")
+	fmt.Fprintf(w, "domains:"+strings.Join(domains, ",")+" url:"+url)
 }
 
-func check(domain string) time.Time {
+func cron() {
+	go func() {
+		t := time.NewTicker(3 * time.Second) // 3秒おきに通知
+		for {
+			select {
+			case <-t.C:
+				checkAll()
+			}
+		}
+		t.Stop()
+	}()
+}
+
+func checkAll() {
+	for _, domain := range domains {
+		check(domain)
+	}
+}
+
+func check(domain string) {
 	config := tls.Config{}
 
 	conn, err := tls.Dial("tcp", domain+":443", &config)
 	if err != nil {
-		log.Fatal("domain: " + domain + ", error: " + err.Error())
+		log.Fatal("domain:" + domain + " error:" + err.Error())
+		return
 	}
 
 	state := conn.ConnectionState()
@@ -43,16 +59,18 @@ func check(domain string) time.Time {
 
 	defer conn.Close()
 
-	return certs[0].NotAfter
+	duration := certs[0].NotAfter.Unix() - time.Now().Unix()
+	report(domain, fmt.Sprint(duration))
 }
 
-func post(url string, domain string, value string) {
+func report(domain string, value string) {
 	fmt.Println("domain:" + domain + " expires:" + value + " url:" + url)
 	client := new(http.Client)
 	req, _ := http.NewRequest("POST", url, strings.NewReader("deadline,domain="+domain+" value="+value))
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err.Error())
+		log.Fatal("error:" + err.Error())
+		return
 	}
 	defer res.Body.Close()
 }
