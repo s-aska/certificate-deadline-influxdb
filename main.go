@@ -16,6 +16,7 @@ var url string
 func main() {
 	domains = strings.Split(os.Getenv("DOMAINS"), ",")
 	url = os.Getenv("INFLUXDB_WRITE_URL") // http://localhost:8086/write?db=mydb
+	fmt.Println("[Startup] domains:"+strings.Join(domains, ",")+" url:"+url)
 	cron()
 
 	http.HandleFunc("/", handler) // ハンドラを登録してウェブページを表示させる
@@ -28,7 +29,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func cron() {
 	go func() {
-		t := time.NewTicker(3 * time.Second) // 3秒おきに通知
+		t := time.NewTicker(600 * time.Second)
 		for {
 			select {
 			case <-t.C:
