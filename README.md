@@ -27,5 +27,5 @@ docker run \
 #### Grafana
 
 ```sh
-SELECT mean("value") FROM "deadline" WHERE "domain" = 'example.com' AND $timeFilter GROUP BY time($interval) fill(null)
+SELECT mean("value") FROM "deadline" WHERE $timeFilter GROUP BY time($interval), "domain" fill(null)
 ```
